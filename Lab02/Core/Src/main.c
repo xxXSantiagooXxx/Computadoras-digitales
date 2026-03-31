@@ -31,6 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define EJERCICIO_ACTUAL 2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -63,6 +64,7 @@ static void MX_GPIO_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	uint8_t seleccion_led = 0; // 0 = LED1 (0.25Hz), 1 = LED2 (10Hz)  actua como una bandera.
 
   /* USER CODE END 1 */
 
@@ -92,21 +94,61 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  // --- Dos parpadeos del pin D11 (500ms encendido, 500ms apagado) ---
-	      for(int i = 0; i < 2; i++) {
-	          HAL_GPIO_WritePin(D11_GPIO_Port, D11_Pin, GPIO_PIN_SET);
-	          HAL_Delay(500);
-	          HAL_GPIO_WritePin(D11_GPIO_Port, D11_Pin, GPIO_PIN_RESET);
-	          HAL_Delay(500);
-	      }
+	  #if EJERCICIO_ACTUAL == 1
+		  // --- Dos parpadeos del pin D11 (500ms encendido, 500ms apagado) ---
+		  	      for(int i = 0; i < 2; i++) {
+		  	          HAL_GPIO_WritePin(D11_GPIO_Port, D11_Pin, GPIO_PIN_SET);
+		  	          HAL_Delay(500);
+		  	          HAL_GPIO_WritePin(D11_GPIO_Port, D11_Pin, GPIO_PIN_RESET);
+		  	          HAL_Delay(500);
+		  	      }
 
-	      // --- Cuatro parpadeos del pin D4 (200ms encendido, 200ms apagado) ---
-	      for(int i = 0; i < 4; i++) {
-	          HAL_GPIO_TogglePin(D4_GPIO_Port, D4_Pin); // Toggle invierte el estado actual
-	          HAL_Delay(200);
-	          HAL_GPIO_TogglePin(D4_GPIO_Port, D4_Pin);
-	          HAL_Delay(200);
-	      }
+		  	      // --- Cuatro parpadeos del pin D4 (200ms encendido, 200ms apagado) ---
+		  	      for(int i = 0; i < 4; i++) {
+		  	          HAL_GPIO_TogglePin(D4_GPIO_Port, D4_Pin); // Toggle invierte el estado actual
+		  	          HAL_Delay(200);
+		  	          HAL_GPIO_TogglePin(D4_GPIO_Port, D4_Pin);
+		  	          HAL_Delay(200);
+		  	      }
+
+	  #elif EJERCICIO_ACTUAL == 2
+		  	    // 1. Leer el estado del pulsador
+		  	          // Como usamos Pull-up, al presionar lee RESET (0V)
+		  	          if (HAL_GPIO_ReadPin(BOTON_GPIO_Port, BOTON_Pin) == GPIO_PIN_RESET) {
+		  	              seleccion_led = !seleccion_led; // Alternar la selección
+		  	              HAL_Delay(300); // Pequeña demora para que un solo toque no cambie el estado 50 veces
+		  	          }
+
+		  	          // 2. Ejecutar el parpadeo según la selección
+		  	          if (seleccion_led == 0) {
+		  	              // Apagamos el LED2 por si quedó encendido al cambiar de estado
+		  	              HAL_GPIO_WritePin(D4_GPIO_Port, D4_Pin, GPIO_PIN_RESET);
+
+		  	              // Parpadeo LED1 a 0,25Hz
+		  	              HAL_GPIO_TogglePin(D11_GPIO_Port, D11_Pin);
+		  	              HAL_Delay(2000);
+		  	          }
+		  	          else {
+		  	              // Apagamos el LED1 por si quedó encendido al cambiar de estado
+		  	              HAL_GPIO_WritePin(D11_GPIO_Port, D11_Pin, GPIO_PIN_RESET);
+
+		  	              // Parpadeo LED2 a 10Hz
+		  	              HAL_GPIO_TogglePin(D4_GPIO_Port, D4_Pin);
+		  	              HAL_Delay(50);
+		  	          }
+
+
+	  #elif EJERCICIO_ACTUAL == 3
+
+
+	  #elif EJERCICIO_ACTUAL == 4
+
+
+	  #elif EJERCICIO_ACTUAL == 5
+
+
+	  #endif
+
 
     /* USER CODE END WHILE */
 
@@ -169,10 +211,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, D11_Pin|D4_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : BOTON_Pin */
+  GPIO_InitStruct.Pin = BOTON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(BOTON_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : D11_Pin D4_Pin */
   GPIO_InitStruct.Pin = D11_Pin|D4_Pin;
