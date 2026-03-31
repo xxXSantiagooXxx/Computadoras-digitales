@@ -1,0 +1,58 @@
+# =========================
+
+# STM32CubeIDE / C Projects
+
+# =========================
+
+# Build directories
+
+Debug/
+Release/
+build/
+out/
+
+# Compiled objects and binaries
+
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.a
+
+# Logs
+
+*.log
+
+# Temporary / backup files
+
+*.tmp
+*.bak
+*~
+*.swp
+
+# OS files
+
+.DS_Store
+Thumbs.db
+
+# VS Code (si alguno lo usa)
+
+.vscode/
+
+# --- IMPORTANTE ---
+
+# NO ignorar estos (necesarios para compartir proyecto)
+
+# .project
+
+# .cproject
+
+# .settings/
+
+# *.ioc
+
+# Drivers/
+
+# Core/
