@@ -56,3 +56,5 @@ Thumbs.db
 # Drivers/
 
 # Core/
+Lab02/.settings
+Lab02/Lab02 Debug.launch

@@ -46,6 +46,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -82,6 +83,7 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
+  MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -90,6 +92,22 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  // --- Dos parpadeos del pin D11 (500ms encendido, 500ms apagado) ---
+	      for(int i = 0; i < 2; i++) {
+	          HAL_GPIO_WritePin(D11_GPIO_Port, D11_Pin, GPIO_PIN_SET);
+	          HAL_Delay(500);
+	          HAL_GPIO_WritePin(D11_GPIO_Port, D11_Pin, GPIO_PIN_RESET);
+	          HAL_Delay(500);
+	      }
+
+	      // --- Cuatro parpadeos del pin D4 (200ms encendido, 200ms apagado) ---
+	      for(int i = 0; i < 4; i++) {
+	          HAL_GPIO_TogglePin(D4_GPIO_Port, D4_Pin); // Toggle invierte el estado actual
+	          HAL_Delay(200);
+	          HAL_GPIO_TogglePin(D4_GPIO_Port, D4_Pin);
+	          HAL_Delay(200);
+	      }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -139,6 +157,30 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, D11_Pin|D4_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : D11_Pin D4_Pin */
+  GPIO_InitStruct.Pin = D11_Pin|D4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
 }
 
 /* USER CODE BEGIN 4 */
