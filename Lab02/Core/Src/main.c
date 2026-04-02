@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define EJERCICIO_ACTUAL 4
+#define EJERCICIO_ACTUAL 1
 volatile uint8_t estado_variable = 0;
 /* USER CODE END PD */
 
