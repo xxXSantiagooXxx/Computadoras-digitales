@@ -31,7 +31,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define EJERCICIO_ACTUAL 2
+#define EJERCICIO_ACTUAL 4
+volatile uint8_t estado_variable = 0;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -141,7 +142,13 @@ int main(void)
 	  #elif EJERCICIO_ACTUAL == 3
 
 
-	  #elif EJERCICIO_ACTUAL == 4
+#elif EJERCICIO_ACTUAL == 4
+		// Al retornar de la ISR, leemos la variable y accionamos el LED D11
+		  	        //if (estado_variable == 1) {
+		  	        //	HAL_GPIO_WritePin(D11_GPIO_Port, D11_Pin, GPIO_PIN_SET);
+		  	        //} else {
+		  	        //	HAL_GPIO_WritePin(D11_GPIO_Port, D11_Pin, GPIO_PIN_RESET);
+		  	        //}
 
 
 	  #elif EJERCICIO_ACTUAL == 5
@@ -215,25 +222,38 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, D11_Pin|D4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, PB3_Pin|D11_Pin|D4_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : BOTON_Pin */
-  GPIO_InitStruct.Pin = BOTON_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  /*Configure GPIO pin : PA12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_12;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(BOTON_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : D11_Pin D4_Pin */
-  GPIO_InitStruct.Pin = D11_Pin|D4_Pin;
+  /*Configure GPIO pins : PB3_Pin D11_Pin D4_Pin */
+  GPIO_InitStruct.Pin = PB3_Pin|D11_Pin|D4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
+// Esta función es llamada automáticamente por la HAL cuando ocurre la interrupción
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    // Verificamos que la interrupción provenga de la línea de nuestro pin PD2
+    if(GPIO_Pin == GPIO_PIN_12) {
+        estado_variable = !estado_variable; // Alterna el estado entre 0 y 1
 
+        HAL_GPIO_TogglePin(GPIOB, PB3_Pin);
+    }
+}
 /* USER CODE END 4 */
 
 /**
